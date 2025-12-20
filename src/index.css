@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap");
+
+@layer base {
+  :root {
+    /* Spiritual Color Palette */
+    --background: 0 0% 96%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 89%;
+    --popover-foreground: 0 0% 9%;
+
+    /* Saffron Orange - Primary */
+    --primary: 243 75% 58%;
+    --primary-foreground: 225 100% 96%;
+
+    /* Deep Maroon - Secondary */
+    --secondary: 0 0% 32%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Warm Cream - Muted */
+    --muted: 0 0% 63%;
+    --muted-foreground: 0 0% 9%;
+
+    /* Gold - Accent */
+    --accent: 250 100% 97%;
+    --accent-foreground: 258 89% 66%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 85% 97%;
+
+    --border: 0 0% 83%;
+    --input: 0 0% 83%;
+    --ring: 243 75% 58%;
+
+    --radius: 1.25rem;
+
+    /* Custom Gradients */
+    --gradient-saffron: linear-gradient(135deg, hsl(30, 95%, 55%), hsl(40, 90%, 60%));
+    --gradient-maroon: linear-gradient(135deg, hsl(350, 45%, 30%), hsl(340, 50%, 25%));
+    --gradient-gold: linear-gradient(135deg, hsl(43, 80%, 50%), hsl(38, 85%, 55%));
+    --gradient-sacred: linear-gradient(180deg, hsl(35, 30%, 97%) 0%, hsl(35, 25%, 92%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(30 95% 55% / 0.15);
+    --shadow-card: 0 8px 30px -8px hsl(25 30% 15% / 0.12);
+    --shadow-glow: 0 0 40px hsl(43 80% 50% / 0.3);
+
+    /* Typography */
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+
+    /* Sidebar */
+    --sidebar-background: 35 25% 95%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 243 75% 58%;
+    --sidebar-primary-foreground: 225 100% 96%;
+    --sidebar-accent: 0 0% 32%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 83%;
+    --sidebar-ring: 243 75% 58%;
+    --chart-1: 234 89% 73%;
+    --chart-2: 255 91% 76%;
+    --chart-3: 270 95% 75%;
+    --chart-4: 238 83% 66%;
+    --chart-5: 0 0% 45%;
+    --sidebar: 0 0% 98%;
+    --font-sans: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    --font-serif: 'EB Garamond', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
+  }
+
+  .dark {
+    --background: 0 0% 9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 25%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 234 89% 73%;
+    --primary-foreground: 243 47% 20%;
+
+    --secondary: 0 0% 45%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 45%;
+    --muted-foreground: 0 0% 98%;
+
+    --accent: 261 72% 22%;
+    --accent-foreground: 255 91% 76%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 85% 97%;
+
+    --border: 0 0% 32%;
+    --input: 0 0% 32%;
+    --ring: 234 89% 73%;
+
+    --sidebar-background: 25 20% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 234 89% 73%;
+    --sidebar-primary-foreground: 243 47% 20%;
+    --sidebar-accent: 255 91% 76%;
+    --sidebar-accent-foreground: 261 72% 22%;
+    --sidebar-border: 0 0% 32%;
+    --sidebar-ring: 234 89% 73%;
+    --chart-1: 229 93% 81%;
+    --chart-2: 252 94% 85%;
+    --chart-3: 269 97% 85%;
+    --chart-4: 234 89% 73%;
+    --chart-5: 0 0% 45%;
+    --sidebar: 0 0% 14%;
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .text-gradient-saffron {
+    background: var(--gradient-saffron);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-saffron {
+    background: var(--gradient-saffron);
+  }
+
+  .bg-gradient-maroon {
+    background: var(--gradient-maroon);
+  }
+
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .bg-gradient-sacred {
+    background: var(--gradient-sacred);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Decorative Pattern */
+  .pattern-mandala {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a574' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(43 80% 50% / 0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-400 { animation-delay: 0.4s; }
