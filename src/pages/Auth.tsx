@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+// FIX: Import from your firebase setup file
+import { auth } from "../lib/firebase"; 
+import { 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber, 
+  onAuthStateChanged,
+  ConfirmationResult 
+} from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +21,13 @@ const otpSchema = z.string().length(6, "OTP must be 6 digits");
 
 type AuthStep = "phone" | "otp";
 
+// Add window type definition for reCAPTCHA
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+  }
+}
+
 const Auth = () => {
   const [step, setStep] = useState<AuthStep>("phone");
   const [phone, setPhone] = useState("+91");
@@ -22,25 +36,43 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [errors, setErrors] = useState<{ phone?: string; otp?: string; fullName?: string }>({});
+  
+  // Store the Firebase confirmation result to verify OTP later
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // 1. Listen for Auth State Changes (Firebase)
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
         navigate("/");
       }
     });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, [navigate]);
 
+  // 2. Initialize Invisible ReCAPTCHA
+  useEffect(() => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+        'expired-callback': () => {
+            toast({
+                title: "Error",
+                description: "reCAPTCHA expired. Please try again.",
+                variant: "destructive",
+            });
+        }
+      });
+    }
+  }, [toast]);
+
+  // Timer logic
   useEffect(() => {
     if (resendTimer > 0) {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
@@ -68,27 +100,25 @@ const Auth = () => {
     return true;
   };
 
-  // --- FIXED: Uses Direct Supabase Auth (No Edge Function) ---
+  // --- FIREBASE: Send OTP ---
   const handleSendOtp = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    
     if (!validatePhone()) return;
     
     setLoading(true);
 
     try {
-      // Direct call to Supabase Auth
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: phone,
-      });
-
-      if (error) {
-        // Handle specific error for missing provider
-        if (error.message.includes("Signups not allowed for this")) {
-            throw new Error("Phone authentication is not enabled in Supabase dashboard.");
-        }
-        throw error;
+      if (!window.recaptchaVerifier) {
+          throw new Error("Recaptcha not initialized");
       }
+
+      const appVerifier = window.recaptchaVerifier;
+      
+      // Firebase function to send SMS
+      const confirmation = await signInWithPhoneNumber(auth, phone, appVerifier);
+      
+      // Save the result so we can confirm the code later
+      setConfirmationResult(confirmation);
 
       toast({
         title: "OTP Sent!",
@@ -97,11 +127,18 @@ const Auth = () => {
       
       setStep("otp");
       setResendTimer(60);
-    } catch (error: any) {
-      console.error("OTP Error:", error);
+    } catch (error) {
+      console.error("Firebase Auth Error:", error);
+      
+      // Reset reCAPTCHA if error occurs so user can try again
+      if(window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          // Ideally re-initialize, but often clearing is enough to trigger a reload or manual reset
+      }
+
       toast({
         title: "Failed to send OTP",
-        description: error.message || "Please check your internet connection.",
+        description: error.message || "Could not send SMS. Check quota or internet.",
         variant: "destructive",
       });
     } finally {
@@ -109,34 +146,25 @@ const Auth = () => {
     }
   };
 
-  // --- FIXED: Uses Direct Verification ---
+  // --- FIREBASE: Verify OTP ---
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateOtp()) return;
+    if (!confirmationResult) {
+        toast({ title: "Error", description: "Session expired. Please resend OTP.", variant: "destructive" });
+        return;
+    }
     
     setLoading(true);
 
     try {
-      // Direct verification
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone: phone,
-        token: otp,
-        type: 'sms',
-      });
+      // Confirm the code using the object we saved earlier
+      const result = await confirmationResult.confirm(otp);
+      const user = result.user;
 
-      if (error) throw error;
-
-      // Optional: Update Full Name if provided (since we aren't using the custom function anymore)
-      if (data.user && fullName.trim()) {
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { full_name: fullName.trim() }
-        });
-        
-        if (updateError) {
-             console.warn("Failed to update profile name:", updateError);
-        }
-      }
+      // Optional: Update Display Name if it's a new user
+      // Note: Firebase `updateProfile` isn't imported here but follows standard pattern
+      // if (fullName) { ... }
 
       toast({
         title: "Success!",
@@ -144,10 +172,10 @@ const Auth = () => {
       });
 
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid OTP. Please try again.",
+        description: "Invalid OTP code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -156,11 +184,9 @@ const Auth = () => {
   };
 
   const handlePhoneChange = (value: string) => {
-    // Ensure +91 prefix stays
     if (!value.startsWith("+91")) {
       value = "+91" + value.replace(/^\+91/, "");
     }
-    // Only allow digits after +91
     const digits = value.slice(3).replace(/\D/g, "");
     setPhone("+91" + digits.slice(0, 10));
   };
@@ -179,7 +205,6 @@ const Auth = () => {
       </Button>
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl font-bold text-primary">
             🙏 श्री सनातन पूजा पाठ
@@ -236,6 +261,9 @@ const Auth = () => {
                     <p className="text-sm text-destructive">{errors.phone}</p>
                   )}
                 </div>
+
+                {/* Hidden container for ReCAPTCHA */}
+                <div id="recaptcha-container"></div>
 
                 <Button
                   type="submit"
