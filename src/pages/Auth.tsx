@@ -68,6 +68,7 @@ const Auth = () => {
     return true;
   };
 
+  // --- FIXED: Uses Direct Supabase Auth (No Edge Function) ---
   const handleSendOtp = async (e?: React.FormEvent) => {
     e?.preventDefault();
     
@@ -76,16 +77,17 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await supabase.functions.invoke("send-otp", {
-        body: { phone },
+      // Direct call to Supabase Auth
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phone,
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (response.data?.error) {
-        throw new Error(response.data.error);
+      if (error) {
+        // Handle specific error for missing provider
+        if (error.message.includes("Signups not allowed for this")) {
+            throw new Error("Phone authentication is not enabled in Supabase dashboard.");
+        }
+        throw error;
       }
 
       toast({
@@ -96,9 +98,10 @@ const Auth = () => {
       setStep("otp");
       setResendTimer(60);
     } catch (error: any) {
+      console.error("OTP Error:", error);
       toast({
         title: "Failed to send OTP",
-        description: error.message || "Please try again.",
+        description: error.message || "Please check your internet connection.",
         variant: "destructive",
       });
     } finally {
@@ -106,6 +109,7 @@ const Auth = () => {
     }
   };
 
+  // --- FIXED: Uses Direct Verification ---
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -114,41 +118,29 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await supabase.functions.invoke("verify-otp", {
-        body: { phone, otp, fullName: fullName.trim() },
+      // Direct verification
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: phone,
+        token: otp,
+        type: 'sms',
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
+      if (error) throw error;
 
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-
-      if (response.data?.actionLink) {
-        // Use the action link to complete sign in
-        const url = new URL(response.data.actionLink);
-        const token = url.searchParams.get("token");
-        const type = url.searchParams.get("type") as any;
+      // Optional: Update Full Name if provided (since we aren't using the custom function anymore)
+      if (data.user && fullName.trim()) {
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { full_name: fullName.trim() }
+        });
         
-        if (token && type) {
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: type,
-          });
-
-          if (error) {
-            throw error;
-          }
+        if (updateError) {
+             console.warn("Failed to update profile name:", updateError);
         }
       }
 
       toast({
-        title: response.data?.isNewUser ? "Welcome!" : "Welcome back!",
-        description: response.data?.isNewUser 
-          ? "Your account has been created successfully." 
-          : "You have successfully logged in.",
+        title: "Success!",
+        description: "You have successfully logged in.",
       });
 
       navigate("/");
@@ -247,8 +239,8 @@ const Auth = () => {
 
                 <Button
                   type="submit"
-                  variant="saffron"
-                  className="w-full"
+                  variant="default" 
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                   disabled={loading}
                 >
                   {loading ? (
@@ -286,8 +278,8 @@ const Auth = () => {
 
                 <Button
                   type="submit"
-                  variant="saffron"
-                  className="w-full"
+                  variant="default"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                   disabled={loading || otp.length !== 6}
                 >
                   {loading ? (
