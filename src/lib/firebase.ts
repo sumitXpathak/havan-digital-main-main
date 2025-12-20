@@ -4,12 +4,13 @@ import { getAuth } from "firebase/auth";
 
 // REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE CONSOLE
 const firebaseConfig = {
-  apiKey: "AIzaSy...", 
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "12345...",
-  appId: "1:12345..."
+   apiKey: "AIzaSyAGgkXDKzYwApXnbvSMkRqD3VuhltcDgsY",
+  authDomain: "havan-samidha.firebaseapp.com",
+  projectId: "havan-samidha",
+  storageBucket: "havan-samidha.firebasestorage.app",
+  messagingSenderId: "370503417168",
+  appId: "1:370503417168:web:3eecacabb8be7e6132c055",
+  measurementId: "G-YJ8ZWP00LR"
 };
 
 const app = initializeApp(firebaseConfig);
